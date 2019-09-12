@@ -145,18 +145,17 @@ void srchevent(solnode *list, int xevent, solnode **current, solnode **previous,
         *pprevious = *previous; *previous = *current;
         *current = (*current)->next;
     }
-    return;
 }
 
 /* I'll fix this and change it
 */
 void adjustlist(solnode **list, solnode *pprevious, solnode *previous, solnode *current)
 {
-    if (*list == current) return;
-    previous->next = current->next; current->next = *list;
-    *list = current;
-    if (pprevious) pprevious->next = previous;
-    return;
+   if (*list == current) return;
+   previous->next = current->next;
+   current->next = previous;
+   if (pprevious) pprevious->next = current;
+   else *list = current;
 }
 
 void displayevents(solnode *list)
@@ -171,7 +170,6 @@ void displayevents(solnode *list)
         crnt = crnt->next;
     }
     printf("\n");
-    return;
 }
 
 void freelist(solnode **list)
@@ -184,5 +182,4 @@ void freelist(solnode **list)
         freenode(&temp);
     }
     *list = NULL;
-    return;
 }
