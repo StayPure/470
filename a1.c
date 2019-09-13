@@ -1,3 +1,42 @@
+/*  
+Name: Bell, Berman                          Class: cps470
+Section:                                    Assignment: 01
+Due: September 12, 2019                     Started: September 6, 2019
+Credit: 10 points.
+
+Problem: Write a program that implements a singly linked list to keep track
+of events as they occur. An event is defined as a randomly generated number
+from 1 to 53. The list tracks the number corresponding to the event and
+the frequency of occurence up to that point. Events that do not exist in the
+list when the event occurs are inserted at the end of the list. An event that
+is already in the list will have its frequency updated and the node is moved
+to the front of the list.
+
+Solution: The solnode list is comprised of user defined structs acting
+as a singly linked list. Each solnode holds the numerical value of each 
+occuring event as well as the frequency of the given event occuring.
+The list is continuously updated and events that occur multiple times are 
+appended to the front of the list. This process continues until the last
+event is generated.
+
+Data-structure used: A singly linked list created using user defined struct
+solnode.
+
+Accessing functions for the data structure: Standard C functions for 
+accessing lists and structs.
+
+Errors Handled: If the commands in the command line do not match the
+required format, an error message is printed to the console instructing
+the user on the proper command format.
+
+Limitations: The program only generates events numbered 1 to 53. This can 
+be changed by altering the value of POOLSZ.
+
+Acknowledgment: Kevin worked on the program extensively for this assignment.
+Nathan helped in debugging and formatting the code as well as worked on the
+documentation. Kevin also helped with the content of the documentation.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -71,6 +110,12 @@ void initpool(void)
     avail = pool;
 }
 
+/* Design a module that obtains a node from the global pool.
+   The pointer passed in to the module now points to the first
+   available node in the pool. The previously available node 
+   pointer is then moved to the next available node.
+   Called by insertevent().
+*/
 void getnode(solnode **ptr)
 {
     *ptr = NULL;
@@ -81,6 +126,11 @@ void getnode(solnode **ptr)
     }
 }
 
+/* Design a module that returns the node pointed by ptr
+   to the available pool.
+   Sets the given node to NULL after the operation completes.
+   Called by freelist().
+*/
 void freenode(solnode **tofree)
 {
     if (*tofree != NULL)
@@ -91,6 +141,11 @@ void freenode(solnode **tofree)
     }
 }
 
+/* Design a module that generates an event.
+   Returns a randomly generated integer bounded by the
+   value of POOLSZ.
+   Called by main().
+*/
 int nextevent(void)
 {
     return (rand() % POOLSZ);
@@ -158,6 +213,11 @@ void adjustlist(solnode **list, solnode *pprevious, solnode *previous, solnode *
    else *list = current;
 }
 
+/* Design a module that displays the list in the correct format.
+   Prints the list contents to stdout as comma separated 
+   event : frequency pairs.
+   Called by main().
+*/
 void displayevents(solnode *list)
 {
     solnode *crnt = list;
@@ -172,6 +232,11 @@ void displayevents(solnode *list)
     printf("\n");
 }
 
+/* Design a module to free every node in the list.
+   Returns the storage for list back to the system one node at a time
+   by calling freenode(). This process leaves the list empty.
+   Called by main().
+*/
 void freelist(solnode **list)
 {
     solnode *crnt = *list, *temp;
