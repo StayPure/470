@@ -152,11 +152,11 @@ int nextevent(void) { return (rand() % POOLSZ); }
    Called by main().
 */
 int insertevent(solnode **list, int event) {
-  void adjustlist(solnode * *list, solnode * pprevious, 
-                  solnode * previous, solnode * current);
-  void displayevents(solnode * list);
-  void srchevent(solnode * list, int xevent, solnode **current,
-                 solnode **previous, solnode **pprevious);
+   void adjustlist(solnode * *list, solnode * pprevious, 
+                   solnode * previous, solnode * current);
+   void displayevents(solnode * list);
+   void srchevent(solnode * list, int xevent, solnode **current,
+                  solnode **previous, solnode **pprevious);
 
    solnode *crnt = NULL, *prev, *pprev, *newnode;
    srchevent(*list, event, &crnt, &prev, &pprev);
