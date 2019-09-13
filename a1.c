@@ -240,12 +240,15 @@ void adjustlist(solnode **list, solnode *pprevious, solnode *previous,
 */
 void displayevents(solnode *list) {
    solnode *crnt = list;
-   while (crnt) {
-     if (crnt->eventnr == list->eventnr)
-       printf("%d : %d", crnt->eventnr, crnt->eventfq);
-     else
-       printf(", %d : %d", crnt->eventnr, crnt->eventfq);
-     crnt = crnt->next;
+   int i;
+   for (i = 0; crnt; i++)
+   {
+      if (i % 5 == 0 && i != 0) printf("\n");
+      if (!crnt->next)
+         printf("%d : %d", crnt->eventnr, crnt->eventfq);
+      else
+         printf("%d : %d, ", crnt->eventnr, crnt->eventfq);
+      crnt = crnt->next;
    }
    printf("\n");
 }
