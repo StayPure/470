@@ -1,6 +1,6 @@
 /*  
-Name: Bell, Berman                          Class: cps470
-Section:                                    Assignment: 01
+Name: Bell, Berman                          Class: CPS470
+Section: 22371841                           Assignment: 01
 Due: September 12, 2019                     Started: September 6, 2019
 Credit: 10 points.
 
@@ -151,6 +151,18 @@ int nextevent(void)
     return (rand() % POOLSZ);
 }
 
+/* Design a module that inserts an event into the linked list at the
+   tail.
+   Starts by creating four nodes; a current node (crnt), a previous
+   node (prev), a previous previous node (pprev), and a newnode. With
+   the first three nodes we preform a search (srchevent()) for the 
+   event if the search worked increment the event and adjust the list
+   (adjustlist()) if not check if its the first node to be added if
+   so add it using newnode, else it loops till it gets to the end of 
+   the linkedlist and use newnode to add it to the list, if all fails
+   return 0 else return 1.
+   Called by main().
+*/
 int insertevent(solnode **list, int event)
 {
     void adjustlist(solnode * *list, solnode * pprevious, solnode * previous, solnode * current);
@@ -188,6 +200,15 @@ int insertevent(solnode **list, int event)
     return 0;
 }
 
+/* Design a module that searchs through the linked list and finds 
+   the node with the specified event number.
+   Sets the current node to the start of the linked list, and sets
+   both previous and previous previous nodes to NULL, then it loops
+   through the linked list till it finds the node with the correct
+   event number making sure to keep previous node one behind current
+   and pprevious two behind current once found it returns.
+   Called by insertevent().
+*/
 void srchevent(solnode *list, int xevent, solnode **current, solnode **previous, solnode **pprevious)
 {
     void displayevents(solnode * list);
@@ -202,7 +223,15 @@ void srchevent(solnode *list, int xevent, solnode **current, solnode **previous,
     }
 }
 
-/* I'll fix this and change it
+/* Design a module that transposes a specified node one posision
+   closer to the front of the list. 
+   First, it checks the current node to see if it is already at the
+   top of the list and if not makes the previous node point to the 
+   node after current, set the current node to point at the previous
+   and if there is a previous previous node set it to point at the 
+   current node otherwise set the current node to the head of the
+   list.
+   Called by insertevent().
 */
 void adjustlist(solnode **list, solnode *pprevious, solnode *previous, solnode *current)
 {
