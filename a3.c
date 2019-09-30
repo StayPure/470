@@ -1,5 +1,5 @@
 /*
-	Name: Bell, Berman						   Class: CPS 470
+   Name: Bell, Berman			  Class: CPS 470
    Section: 22371841                      Assignment: 03
    Due: October 3, 2019                   Started: September 28, 2019 
    Credit: 10 points.
@@ -14,8 +14,8 @@
 	anything if the destination is invalid, and only copy files that
 	are regular files and if they aren't stop the copy and give the
 	reason for not doing the copy. The program also needs to use
-   fork() and wait() system calls to have multiple process working
-   on different files.
+   	fork() and wait() system calls to have multiple process working
+   	on different files.
 
 	Solution: The program was broken into two main parts, one part
 	checks if given paths are valid or not (isvalid()), and then the
@@ -27,13 +27,13 @@
 	and return 1 so copying files doesn't try to copy it.
 	copyingfiles() uses buildpath() to know where to put the copy it
 	then it loops through creating processes that lets isvalid() check
-   the file if it is valid, it sends the original's path and the 
-   copy's path to makecp() for it to copy which also can cancel if 
-   there is any errors, once copied it goes to the end and sends the
-   success status to the parent process and waits for the rest of the
-   child process to be finished. Once done it returns a 0 if no 
-   copies were made ending the program in an EXIT_FAILURE and 1
-   (EXIT_SUCCESS) otherwise.
+   	the file if it is valid, it sends the original's path and the 
+   	copy's path to makecp() for it to copy which also can cancel if 
+   	there is any errors, once copied it goes to the end and sends the
+   	success status to the parent process and waits for the rest of the
+   	child process to be finished. Once done it returns a 0 if no 
+   	copies were made ending the program in an EXIT_FAILURE and 1
+   	(EXIT_SUCCESS) otherwise.
 
 	Data-structure used: A one-dimensional array for the command line
 	arguments.
@@ -46,7 +46,7 @@
 	if the file is already in the place it's trying to be copied too.
 	The program also checks if there are errors during the copy
 	process to stop it from making a bad file. Lastly, it checks if
-   the program failed to be forked.
+   	the program failed to be forked.
 
 	Limitations: As the file gets bigger the speed in which it gets
 	copied gets slower. Can't copy non-regular files.
