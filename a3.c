@@ -1,7 +1,7 @@
 /*
    Name: Bell, Berman			  Class: CPS 470
    Section: 22371841                      Assignment: 03
-   Due: October 3, 2019                   Started: September 28, 2019 
+   Due: October 2, 2019                   Started: September 28, 2019 
    Credit: 10 points.
 
 	Problem: Write a program that copies the given files to the 
