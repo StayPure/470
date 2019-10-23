@@ -14,8 +14,8 @@
 	anything if the destination is invalid, and only copy files that
 	are regular files and if they aren't stop the copy and give the
 	reason for not doing the copy. The program also needs to use
-	fork() and wait() system calls to have multiple process working
-	on different files.
+	threads and shared variables to have files copied by different
+   threads.
 
 	Solution: The program was broken into two main parts, one part
 	checks if given paths are valid or not (isvalid()), and then the
@@ -26,17 +26,16 @@
 	copy it, but if it isn't it prints out the reason it's not valid
 	and return 1 so copying files doesn't try to copy it.
 	copyingfiles() uses buildpath() to know where to put the copy it
-	then it loops through creating processes that lets isvalid() check
-	the file if it is valid, it sends the original's path and the
-	copy's path to makecp() for it to copy which also can cancel if
-	there is any errors, once copied it goes to the end and sends the
-	success status to the parent process and waits for the rest of the
-	child process to be finished. Once done it returns a 0 if no
-	copies were made ending the program in an EXIT_FAILURE and 1
-	(EXIT_SUCCESS) otherwise.
+	then it loops through the files checking if it is valid with
+   isvalid(), if it is then it makes threads to copy the files with
+   each iteration of the loop decrementing the files variable which
+   will indicate wether or not there are more files to process. at
+   the end of the loop it waits for all the files to be processed
+   then it ends on success if files were copied and failure if none
+   were.
 
 	Data-structure used: A one-dimensional array for the command line
-	arguments.
+	arguments and a one-dimensional string array.
 
 	Accessing functions for the data structure: Standard C functions
 	for accessing arrays and structs.
@@ -46,7 +45,7 @@
 	if the file is already in the place it's trying to be copied too.
 	The program also checks if there are errors during the copy
 	process to stop it from making a bad file. Lastly, it checks if
-	the program failed to be forked.
+	mutex, condition, or thread had a problem with being initalized.
 
 	Limitations: As the file gets bigger the speed in which it gets
 	copied gets slower. Can't copy non-regular files.
@@ -195,21 +194,19 @@ int isvalid(char *path, char *dst)
    return 1;
 }
 
-/* Creates a pipe between the parent and its children then,
-   Loops through all of the file paths given, starting a child for
-   each file that checks each if it's path or destination path is
-   valid or not, if it isn't child writes a 0 to the pipe indicating
-   the files were not copied otherwise make a copy writing a integer
-   with the status, PID, and size of the source name to the pipe also
-   writes the actual source path to the pipe, after the loop starts
-   all the child processes it waits while collecting exit status from
-   the pipe and printing results from the children, if no copies are
-   made after the loop return 1 if some were made print the number of
-   copies to the stderr and return 0.
-   Calls buildpath(), makecp(), and isvalid().
+/* Creates an array of threadinputs the size of the files then it
+   loops throught all the files checking each file if it is a valid
+   file to copy (is valid()) if not decrement the files variable and
+   go on to the next file else put the srcfile path and dst path to
+   the files specific threadinput, a thread is then created for the
+   file to be copied (threadcp()). After all the files had been
+   processed the program waits for each files thread to be exited if
+   no copies are made returns a 0 if not print the message of how
+   many copies were made and returns a 1.
+   Calls buildpath(), threadcp(), and isvalid().
    Called by main().
 */
-int copyfiles(int argc, char *argv[])
+int copyfiles(int argc, char *argv[]) 
 {
    void buildpath(char *src, char *dst, char **dstpath);
    void *threadcp(void *arg);
@@ -244,6 +241,14 @@ int copyfiles(int argc, char *argv[])
    return 1;
 }
 
+/* Takes the argument and gets the scr and dst path from it by
+   casting it to chars, the file is then copied regardless if it
+   fails or not the files variable is decremented but if it
+   succeeds copies is incremented and a suceess message is printed
+   then the thread is exited, if it fails the thread is just exited.
+   Calls makecp().
+   Called by copyfiles().  
+*/
 void *threadcp(void *arg)
 {
    int makecp(char *srcpath, char *dstpath);
@@ -273,7 +278,7 @@ void *threadcp(void *arg)
    to, if not return 0, else loop through till there is nothing
    left to write to dstpath if the loop finishes with no problems
    close all files and return 1.
-   Called by copyfiles().
+   Called by threadcp().
 */
 int makecp(char *srcpath, char *dstpath)
 {
