@@ -214,7 +214,6 @@ int copyfiles(int argc, char *argv[])
    void buildpath(char *src, char *dst, char **dstpath);
    void *threadcp(void *arg);
 
-   /*pthread_t threads[argc - 2];*/
    struct threadinput threadinputs[argc - 2];
 
    int i = 1;
