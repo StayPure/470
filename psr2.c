@@ -1,12 +1,37 @@
-/* Makefile should have LDFLAGS = -pthread
- Program creates some threads,
- created threads access a shared resource
- stderr indiscriminately --> and
- race conditions are observable at
- ./a.out 30 (did for me, you mileage may vary)!!
-
+/*
+	Name: Bell, Berman		                      Class: CPS 470
+   	Section: 22371841                      Assignment: 06
+   	Due: November 1, 2019                  Started: October 24, 2019
+   	Credit: 10 points.
+	
+ Problem: Modify the given code in psr.c to simulate a binary
+ semaphore using pthread_mutex_lock(), pthread_mutex_unlock(), and
+ pthread_mutex_destroy(). The provided code should be modified to 
+ eliminate the present race condition.
+	
+ Solution: The program creates a thread and checks if the mutex and
+ condition fail to initialize. If so, the program exits. Otherwise, 
+ the contents of *term() lock and unlock access as required and
+ performs the necessary operations for the semaphore. Once complete, the
+ thread exits. pthread_join() is used to to allow threads to wait for
+ another thread to terminate. The program also checks if there was a 
+ failure in thread creation or join. If a failure occurs, the program
+ exits with an error.
+	
+ Data-structure used: A one dimensional array for pthread_t tid.
+ 
+	Accessing functions for the data structure: Standard C functions
+	for accessing arrays.
+	
+ Errors handled: The program checks if the mutex and conidition initialized
+ properly as well as if there are any errors in the thread join or creation.
+ 
+ Limitations: pthread_mutex_lock(), pthread_mutex_unlock(), and 
+ pthread_mutex_destroy().
+	
+ Acknowledgment: We wrote the program together but we had a lot of
+	help from our classmates throughout the making of it.
 */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -17,6 +42,14 @@ pthread_cond_t done;
 
 /* Access shared resource stderr */
 
+/*
+  The function carries out the operations required
+  for the simulated semaphore to function using threads. 
+  The function used lock and unlock as well as the signal
+  to manage access and signal the completion of the
+  operation. When the operations complete successfully and the 
+  thread exits.
+*/
 void *term(void *arg)
 {
    int i, n = *(int *)arg;
@@ -32,6 +65,10 @@ void *term(void *arg)
    pthread_exit(NULL);
 }
 
+/*
+  die() prints a character parameter to stderr and the program
+  exits.
+*/
 void die (char *x)
 {
    fprintf(stderr, "%s\n", x);
