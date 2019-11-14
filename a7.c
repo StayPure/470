@@ -1,24 +1,43 @@
 /*
 	Name: Bell, Berman		                   Class: CPS 470
-   	Section: 22371841                      Assignment: 04
-   	Due: October 10, 2019                  Started: October 6, 2019
-   	Credit: 5 points.
+   	Section: 22371841                                  Assignment: 07
+   	Due: November 14, 2019                  Started: November 4, 2019
+   	Credit: 10 points.
     
     Problem: Write a fully-functional program that implements a bounded-
     buffer producer/consumer problem using POSIX threads to implement
     multiple producer and consumer threads. The threads must synchronize
     their activity using binary and counting semaphores. The program 
-    should check that arguments from the command line
+    should check that arguments from the command line satisfy the 
+    necessary contraints. When an item is moved to/from the buffer,
+    the corresponding thread should print a message to stdout stating
+    the thread id, item moved, and the location to/from which it is 
+    moved.
     
-    Solution:
+    Solution: A struct queue is defined to act as the bounded buffer
+    and functions as a circular queue. The arguments from the 
+    command line are checked in chkargs() to verify that they
+    are valid. If invalid, the function calls usage() or die() as
+    required. Otherwise returns 1. The semaphore is then initialized
+    by init(). Once the threads are created, they synchronously 
+    perform the operations in the producer and consumer modules
+    corresponding to the nature of the thread. Once complete, the
+    event and each thread are seen in stdout in the proper format.
+    The destroy module is then called to close the semaphore and the 
+    program ends.
     
-    Data-structure used:
+    Data-structures used: User-defined struct queue to act as the bounded 
+    buffer, one-dimensional array.
     
-    Accessing functions for the data structure:
+    Accessing functions for the data structure: Standard C functions for 
+    accessing arrays.
     
-    Limitations:
+    Limitations: A producer cannot place an item in the buffer if there is
+    no room in the buffer. Likewise, a consumer cannot consume from the 
+    buffer if the buffer is empty.
     
-    Acknowledgment:
+    Acknowledgment: We both worked on this program together, but had help
+    from our peers.
 */
 
 #include <stdlib.h>
@@ -73,6 +92,11 @@ int main(int argc, char *argv[])
    exit(0);
 }
 
+/*
+   Takes progname and prints out the correct usage of the program
+   to stderr then exits the program with a failure.
+   Called by chkargs()
+*/
 void usage(char *progname)
 {
   fprintf(stderr,
@@ -80,6 +104,10 @@ void usage(char *progname)
   exit(1);
 }
 
+/*
+   Takes the args from the command line and performs a sanity check.
+   *continued later*
+*/
 int chkargs(int argc, char *argv[], int *prods, int *proditers, int *consmrs, int *criters)
 {
    void die(char *why);
