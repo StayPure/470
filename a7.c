@@ -1,3 +1,26 @@
+/*
+	Name: Bell, Berman		                   Class: CPS 470
+   	Section: 22371841                      Assignment: 04
+   	Due: October 10, 2019                  Started: October 6, 2019
+   	Credit: 5 points.
+    
+    Problem: Write a fully-functional program that implements a bounded-
+    buffer producer/consumer problem using POSIX threads to implement
+    multiple producer and consumer threads. The threads must synchronize
+    their activity using binary and counting semaphores. The program 
+    should check that arguments from the command line
+    
+    Solution:
+    
+    Data-structure used:
+    
+    Accessing functions for the data structure:
+    
+    Limitations:
+    
+    Acknowledgment:
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <semaphore.h>
