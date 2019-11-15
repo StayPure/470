@@ -44,10 +44,10 @@
 #include <stdio.h>
 #include <semaphore.h>
 #include <pthread.h>
-#define BFSIZE 301            /* why 301?? */
+#define BFSIZE 301
 #define MXTHRDS 380
                 
-typedef struct queue {        /* viewed as a circular queue */
+typedef struct queue {
   char data[BFSIZE];
   int front, rear;
   sem_t emptyslots, fullslots, placeitem, removeitem;
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 void usage(char *progname)
 {
   fprintf(stderr,
-   "usage: ./%s <# of producers> <producer interations> <# of consumers> <consumer iterations>\n", progname);
+   "usage: ./%s <#-prods> <prod-iters> <#-cons> <con-iters>\n", progname);
   exit(1);
 }
 
@@ -273,7 +273,7 @@ int deq(char *item)
    of the semaphore does not fail. Then checks that the buffer
    initialization does not fail. If either of these checks fail,
    a call to die() is made with the corresponding message. 
-   Otherwise, the front and rear are set to 0 and 0 is returned.
+   Otherwise, the front and rear are set to 0 and 1 is returned.
    Calls die().
    Called by main().
 */
@@ -295,7 +295,7 @@ int init()
 
    buffer.front = 0;
    buffer.rear = 0;
-   return 0;
+   return 1;
 }
 
 /*
