@@ -106,7 +106,16 @@ void usage(char *progname)
 
 /*
    Takes the args from the command line and performs a sanity check.
-   *continued later*
+   First the module checks that each corresponding argument stored in argv
+   is correctly formatted for the program. If invalid, the module makes a 
+   call to usage with the proper message. The module then checks that the 
+   producer iterations multiplied by the numberof producers is equal to the consumer 
+   iterations multiplied by the numberof consumers, the sum of consumers are producers 
+   does not exceed the maximum amount of threads, and that neither the number of 
+   producers or the number of consumers are less than equal to 0. If any of these checks 
+   fail, a call to die() is made with the corresponding message.
+   Called by main().
+   Calls usage(), die().
 */
 int chkargs(int argc, char *argv[], int *prods, int *proditers, int *consmrs, int *criters)
 {
@@ -135,6 +144,17 @@ int chkargs(int argc, char *argv[], int *prods, int *proditers, int *consmrs, in
    return 1;
 }
 
+/*
+   Performs a check to detect a semaphore wait failure if the buffer has no
+   empty slots or when placing an item into the buffer. Also performs a later
+   check for a semaphore post failure. If these checks fail, a call to die()
+   is made with the corresponding message. If there is no wait failure, calls
+   to randchar() to create an item to be placed in the rear of the buffer. The
+   module prints a statement containing the thread id, the item, and the location
+   at which it is placed in the buffer. The thread then exits using pthread_exit().
+   Called by main().
+   Calls enq(), randchar(), die().
+*/
 void *producer(void *arg)
 {
    int enq(char item);
@@ -161,6 +181,18 @@ void *producer(void *arg)
    pthread_exit(NULL);
 }
 
+/*
+   Performs a check to detect a semaphore wait failure if the buffer does not
+   contain an item or when removing an item from the buffer. Also performs a later
+   check for a semaphore post failure. If these checks fail, a call to die()
+   is made with the corresponding message. If there is no wait failure, the module
+   removes an item from the front of the buffer and stores information on the item
+   and the location from which it was removed. Calls deq() to remove the item. The
+   module prints a statement stating the thread id, item consumed, and the location 
+   from which it was consumed. The thread then exits using pthread_exit().
+   Called by main().
+   Calls deq(), die().
+*/
 void *consumer(void *arg)
 {
    int deq(char *item);
@@ -185,18 +217,34 @@ void *consumer(void *arg)
    pthread_exit(NULL);
 }
 
-
+/*
+   Returns a character to act as an item to be placed in the buffer.
+   A random number from 0-25 is generated and converted into a character
+   via the cast made of type char.
+   Called by producer().
+*/
 char randchar()
 {
    return (char) (rand() % 26) + 65;
 }
 
+/* 
+   Takes why and prints out the reason for the bailout to stderr
+   then exits the program with a failure.
+   Called by main().
+*/
 void die(char *why)
 {
    fprintf(stderr, "Program Killed...\nReason: %s\n", why);
    exit(1);
 }
 
+/*
+   Takes item and places it in the buffer at the rear. Adjusts
+   the position of the rear after the item is placed. Returns
+   1 after the item is successfully placed.
+   Called by producer().
+*/
 int enq(char item)
 {
    buffer.data[buffer.rear] = item;
@@ -205,6 +253,12 @@ int enq(char item)
    return 1;
 }
 
+/*
+   Takes item and removes it from the front of the buffer. Adjusts
+   the position of the front after the item has been consumed.
+   Returns 1 after the item has successfully been removed.
+   Called by consumer().
+*/
 int deq(char *item)
 { 
    *item = '_';
@@ -213,6 +267,16 @@ int deq(char *item)
    return 1;
 }
 
+/*
+   Function initializes the buffer and semaphore required
+   for the program. First checks to ensure that the initalization
+   of the semaphore does not fail. Then checks that the buffer
+   initialization does not fail. If either of these checks fail,
+   a call to die() is made with the corresponding message. 
+   Otherwise, the front and rear are set to 0 and 0 is returned.
+   Calls die().
+   Called by main().
+*/
 int init()
 {
    if (sem_init(&buffer.emptyslots, 1, BFSIZE) == -1
@@ -234,6 +298,13 @@ int init()
    return 0;
 }
 
+/*
+   Checks if the release of any resources fails. If
+   any check fails, a call to die is made with the 
+   corresponding message. Otherwise, the resources
+   are released.
+   Called by main().
+*/
 void destroy()
 {
    if (sem_destroy(&buffer.emptyslots) == -1
