@@ -1,3 +1,37 @@
+/*
+	Name: Bell, Berman		                              Class: CPS 470
+   	Section: 22371841                                  Assignment: 08
+   	Due: November 26, 2019                  Started: November 14, 2019
+   	Credit: 10 points.
+    
+    Problem: Write a fully-functional program that copies a given source
+    file to a destination file using multiple worker threads to perform
+    the copying activity. The source path, destination path, and number
+    of threads are to be specified by the command line arguments. The
+    number of threads provided will determine the number of chunks that
+    the source file is divided in to and all chunks except the last chunk
+    will be of the same size.
+    
+    Solution: A struct args is defined in order to pass the arguments to the
+    respective worker thread. Threads are created and the file size is 
+    defined as well as the offset of the chunks. The files are then opened
+    in the required mode and checked for vailidity. The program prints out
+    the id and offest of the thread when it reaches the barrier. After all
+    threads reach the barrier, the md5sum of the destination path is printed.
+    
+    Data-structures used: User-defined struct args used to pass arguments
+    to the worker threads.
+    
+    Accessing functions for the data structure: Standard C functions for 
+    accessing arrays.
+    
+    Limitations: The program must use POSIX threads. The source path, 
+    destination path, and number of threads to use must be specified
+    in the command lines.
+    
+    Acknowledgment: We both worked on this program together, but had help
+    from our peers.
+*/
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
@@ -68,17 +102,33 @@ int main(int argc, char *argv[])
    domd5(dstpath);
 }
 
+/*
+   Takes progname and prints out the correct usage of the program
+   to stderr then exits the program with a failure.
+   Called by main()
+*/
 void usage(char *progname)
 {
    fprintf(stderr, "./%s srcpath dstpath workercount\n", progname);
    exit(0);
 }
 
+/*
+   Takes why and prints out the reasonthe program was killed
+   to stderr then exits the program with a failure.
+   Called by main().
+   Called by dowork().
+*/
 void die(char *why)
 {
    fprintf(stderr, "Program Killed...\nReason: %s\n", why); exit(1);
 }
 
+/*
+   Takes in the source path and returns the size of the file.
+   If the process fails, 0 is returned.
+   Called by main().
+*/
 long int filesize(char *srcpath)
 {
    struct stat st;
@@ -86,6 +136,11 @@ long int filesize(char *srcpath)
    return st.st_size;
 }
 
+/*
+   Takes in the path and creates a child using fork() to execute
+   md5sum. This is accomplished by using the execlp() system call.
+   Called by main().
+*/
 void domd5(char *path)
 {
    printf("\n");
@@ -96,6 +151,16 @@ void domd5(char *path)
    printf("\n");
 }
 
+/*
+   Takes in the arguments passed in using the user-defined
+   struct. The function is executed by each worker thread.
+   Starts the copy designated for the thread and prints the
+   relevant output. Also checks if there was an error accessing
+   files during the copy. In this case, the function calls die() 
+   with the respective error message. When complete, the thread exits.
+   Called by main().
+   Calls die().
+*/
 void *dowork(void *arg)
 {
    threadarg *args = (threadarg *)arg;
