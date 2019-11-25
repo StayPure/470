@@ -5,10 +5,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/wait.h>
-#include <semaphore.h>
 #include <pthread.h>
-#include <unistd.h>
 
 typedef struct args {
    int fd;
@@ -22,28 +19,29 @@ int barrier = 0;
 
 int main(int argc, char *argv[])
 {
-   void domd5(char *path);
-   void usage(char *progname);
+   void buildpath(char *src, char *dst, char **dstpath);
    int chkdst(char **argv);
    void die(char *why);
-   long int filesize(char *srcpath);
-   void buildpath(char *src, char *dst, char **dstpath);
-   int isvalid(char *path, char *dst);
+   void domd5(char *path);
    void *dowork(void *arg);
+   long int filesize(char *srcpath);
+   int isvalid(char *path, char *dst);
+   void usage(char *progname);
 
    if (argc < 4) usage("a8");
-   int workers, i;
-   char *check; 
-   workers = strtol(argv[3], &check, 10);
+
+   char *check;
+   int workers = strtol(argv[3], &check, 10), i;
    if (!check) usage("a8");
    else if (!chkdst(&argv[2])) die ("DST not valid!");
+
    long int size = filesize(argv[1]);
-   if (size == -1) die ("Could not find file size");
+   if (!size) die ("Could not find file size");
+
    char *dstpath; buildpath(argv[1], argv[2], &dstpath);
-   if (!isvalid(argv[1], dstpath)) die ("scr not valid!");
-   long int chunksize = size / workers;
-   long int remainder = size % workers;
-   
+   isvalid(argv[1], dstpath);
+
+   long int chunksize = size / workers, remainder = size % workers;
    barrier = workers;
    threadarg threadargs[workers];
    pthread_t threads[workers];
@@ -59,14 +57,14 @@ int main(int argc, char *argv[])
          threadargs[i].size = chunksize + remainder;
       else 
          threadargs[i].size = chunksize;
-      
+
       if (pthread_create(&threads[i], NULL, dowork, (void *) &threadargs[i]))
          die("Thread Creation Failure");
    }
    
    for (i = 0; i < workers; i++)
       pthread_join(threads[i], NULL);
-
+   
    domd5(dstpath);
 }
 
@@ -78,8 +76,7 @@ void usage(char *progname)
 
 void die(char *why)
 {
-   fprintf(stderr, "Program Killed...\nReason: %s\n", why);
-   exit(1);
+   fprintf(stderr, "Program Killed...\nReason: %s\n", why); exit(1);
 }
 
 long int filesize(char *srcpath)
@@ -91,48 +88,36 @@ long int filesize(char *srcpath)
 
 void domd5(char *path)
 {
+   printf("\n");
    pid_t pid = fork();
    if (pid == 0) 
       execlp("md5", "md5", path, NULL);
    wait(0);
+   printf("\n");
 }
 
 void *dowork(void *arg)
 {
    threadarg *args = (threadarg *)arg;
-   int fd = args->fd, 
-   copy = args->copy, rd;
-   long int start = args->start, 
-   size = args->size;
-   char bufs[2048], *remains;
-   barrier--;
-   while (barrier > 0);
-   lseek(fd, start, SEEK_SET);
-   lseek(copy, start, SEEK_SET);
+   int fd = args->fd, copy = args->copy, rd;
+   long int start = args->start, size = args->size;
+   char bufs[2048];
+   lseek(fd, start, SEEK_SET); lseek(copy, start, SEEK_SET);
 
-   long int count = 0, remainder = 0, i;
-   for (i = 0; i < size; i += 2048)
+   barrier--;
+   printf("%d thread with offset %ldKB, reached barrier\n", 
+   (int) pthread_self(), start);
+   while (barrier > 0);
+
+   int i;
+   for (i = 0; i < size; i+= 2048)
    {
-      if (i + 2048 > size)
-      {
-         remainder = size - count;
-         remains = malloc(remainder * sizeof(char));
-         rd = read (fd, remains, sizeof(remains));
-         if (write(copy, remains, rd) != rd)
-            die("Error accessing  files during copy"); 
-         count += remainder;
-      }
-      else
-      {
-         rd = read(fd, bufs, sizeof(bufs));
+      rd = read(fd, bufs, sizeof(bufs));
          if (write(copy, bufs, rd) != rd)
-            die("Error accessing files during copy");  
-         count += 2048;
-      }    
+            die("Error accessing files during copy");    
    }
+
    close(fd); close(copy);
-   
-   printf("%d thread with offset %ldKB, reached barrier\n", (int) pthread_self(), start);
    pthread_exit(NULL);
 }
 
@@ -189,22 +174,14 @@ int isregular(char *path)
 */
 int isvalid(char *path, char *dst)
 {
-   if (isdir(path))
-   {
-      return 0;
-   }
-   else if (!isregular(path))
-   {
-      return 0;
-   }
-   else if (dst == NULL)
-   {
-      return 0;
-   }
-   else if (isregular(dst))
-   {
-      return 0;
-   }
+   if (isdir(path)) 
+      die(strcat(path, "  is not a regular file"));
+   else if (!isregular(path)) 
+      die(strcat(path, "  doesn't exist..."));
+   else if (dst == NULL) 
+      die ("Destination creation failure");
+   else if (isregular(dst)) 
+      die (strcat(path, "  already exist at location!"));
 
    return 1;
 }
